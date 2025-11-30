@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 2. LOAD PRODUCTS + RENDER GRID
 // =============================================
 function loadProducts() {
-    fetch('product.json')
+    fetch('/product.json')
         .then(res => res.json())
         .then(data => {
             products = data;
