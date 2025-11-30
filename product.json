@@ -3,13 +3,14 @@
         "id": 1,
         "name": "Noir Wild",
         "price": 520,
-        "image": "/website/images/dish1.png"
+        // "image": "/website/images/dish1.png"
+        "image": "/images/dish1.png"
     },
     {
         "id": 2,
         "name": "Mystery",
         "price": 220,
-        "image": "/website/images/dish2.png"
+        "image": "images/dish2.png"
     },
     {
         "id": 3,
