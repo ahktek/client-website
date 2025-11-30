@@ -222,3 +222,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+document.getElementById('backLink').addEventListener('click', function(e) {
+    // Check if there is history to go back to
+    if (window.history.length > 1) {
+        e.preventDefault(); // Stop the link from going to index.html
+        window.history.back(); // Go back dynamically
+    }
+    // If history is empty (new tab), the code skips this 
+    // and lets the standard href="index.html" work naturally.
+});
