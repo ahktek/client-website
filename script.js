@@ -224,11 +224,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById('backLink').addEventListener('click', function(e) {
-    // Check if there is history to go back to
+    e.preventDefault(); // Stop standard link behavior
+
+    // 1. Try Browser History (Best for standard navigation)
     if (window.history.length > 1) {
-        e.preventDefault(); // Stop the link from going to index.html
-        window.history.back(); // Go back dynamically
+        window.history.back();
+    } 
+    // 2. Try Referrer (The Fix for New Tabs)
+    // We check if a referrer exists AND if it comes from your own website
+    else if (document.referrer && document.referrer.includes(window.location.hostname)) {
+        window.location.href = document.referrer;
+    } 
+    // 3. Last Resort (Fallback to Home)
+    else {
+        window.location.href = 'index.html'; // Or whatever is in your href attribute
     }
-    // If history is empty (new tab), the code skips this 
-    // and lets the standard href="index.html" work naturally.
 });

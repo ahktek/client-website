@@ -243,3 +243,104 @@ if (navbarTotal) {
     }
 }
 
+// =============================================
+// 7. PRODUCT DETAIL PAGE LOGIC (PATH AWARE)
+// =============================================
+
+function initDetailPage() {
+    // 1. Get ID from URL
+    let params = new URLSearchParams(window.location.search);
+    let id = params.get('id');
+    if (!id) return;
+
+    // 2. DETECT FOLDER LOCATION
+    // If we are in the "pages" folder, we need to go up (../) to find product.json
+    const isPagesFolder = window.location.pathname.includes('/pages/');
+    const jsonPath = isPagesFolder ? '../product.json' : 'product.json';
+
+    // 3. Fetch Data
+    fetch(jsonPath)
+        .then(response => response.json())
+        .then(data => {
+            let product = data.find(p => p.id == id);
+            
+            if (product) {
+                // 4. FIX IMAGE DISPLAY PATH FOR THIS PAGE
+                // If the JSON says "images/img.png", but we are in "pages/", 
+                // we must change it to "../images/img.png" for the big main image.
+                let displayImagePath = product.image;
+                if (isPagesFolder && !displayImagePath.startsWith('../')) {
+                    displayImagePath = '../' + displayImagePath;
+                }
+
+                // 5. Inject Data into HTML
+                document.getElementById('detail-img').src = displayImagePath;
+                document.getElementById('detail-name').innerText = product.name;
+                document.getElementById('detail-price').innerText = '$' + product.price;
+                document.getElementById('detail-desc').innerText = product.description || "Premium cannabis product. Lab-tested for purity.";
+                
+                // 6. Activate "Add To Cart" Button
+                let addBtn = document.getElementById('detail-add-btn');
+                addBtn.onclick = function() {
+                    let qty = parseInt(document.getElementById('detail-qty').innerText);
+                    // Note: We pass the ORIGINAL image path (product.image) to the cart memory
+                    addToCartWithQty(product.id, qty, product.image, product.name, product.price);
+                };
+            }
+        });
+}
+
+// Helper: Handle Qty Change on Detail Page (+ / - buttons)
+window.updateDetailQty = function(change) {
+    let qtySpan = document.getElementById('detail-qty');
+    let current = parseInt(qtySpan.innerText);
+    let newQty = current + change;
+    if (newQty < 1) newQty = 1;
+    qtySpan.innerText = newQty;
+}
+
+// Helper: Add Specific Quantity (The Logic)
+function addToCartWithQty(id, qty, image, name, price) {
+    // 1. Check if product exists in cart
+    let positionThisProductInCart = listCart.findIndex((value) => value.id == id);
+
+    if (listCart.length <= 0) {
+        listCart = [{
+            id: id,
+            name: name,
+            price: price,
+            image: image,
+            quantity: qty
+        }];
+    } else if (positionThisProductInCart < 0) {
+        // If not in cart, push new item
+        listCart.push({
+            id: id,
+            name: name,
+            price: price,
+            image: image,
+            quantity: qty
+        });
+    } else {
+        // If exists, just update quantity
+        listCart[positionThisProductInCart].quantity += qty;
+    }
+    
+    // 2. Save & Render
+    saveCartToCookie();
+    renderEverywhere();
+    
+    // 3. Open the Cart Drawer
+    // We explicitly set the style because we are on a subpage
+    document.querySelector('body').classList.add('showCart');
+    const cartDrawer = document.querySelector('.cart');
+    if (cartDrawer) {
+        cartDrawer.style.right = '0';
+        isCartOpen = true; // Sync global state
+    }
+}
+
+// RUN ONLY ON DETAIL PAGE
+if (window.location.pathname.includes('product.html')) {
+    initDetailPage();
+}
